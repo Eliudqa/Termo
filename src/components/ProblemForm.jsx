@@ -19,7 +19,7 @@ export default function ProblemForm({ problemText, onChangeText, onSolve, status
           disabled={!hasApiKey || !problemText.trim() || status === "loading"}
         >
           {status === "loading" ? <Loader2 size={16} className="hxs-spin" /> : <Wand2 size={16} />}
-          {status === "loading" ? "Resolviendo…" : "Resolver con Gemini"}
+          {status === "loading" ? "Resolviendo…" : "Resolver ejercicio"}
         </button>
 
         {!hasApiKey && (

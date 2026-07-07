@@ -1,10 +1,23 @@
 import { useMemo } from "react";
 import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { ArrowRightLeft, Activity } from "lucide-react";
+import { ArrowRightLeft, Activity, Info } from "lucide-react";
 import { generateProfile, isNum } from "../engine.js";
 
 export default function ProfileChart({ solution }) {
   const { Th_in, Th_out, Tc_in, Tc_out, Ch, Cc, Q, isParallel, hot, cold } = solution;
+  const hotName = hot?.nombre || "el fluido caliente";
+  const coldName = cold?.nombre || "el fluido frío";
+
+  // Qué temperaturas específicas faltan (para explicarlo, no solo omitir la
+  // gráfica en silencio como si fuera un error). No incluye Ch/Cc: si esas
+  // faltan pero las 4 temperaturas sí se conocen, es un caso raro que no
+  // vale la pena explicar con el mismo detalle.
+  const missingTemps = [];
+  if (!isNum(Th_in)) missingTemps.push(`T entrada de ${hotName}`);
+  if (!isNum(Th_out)) missingTemps.push(`T salida de ${hotName}`);
+  if (!isNum(Tc_in)) missingTemps.push(`T entrada de ${coldName}`);
+  if (!isNum(Tc_out)) missingTemps.push(`T salida de ${coldName}`);
+
   const data = useMemo(() => {
     if (![Th_in, Th_out, Tc_in, Tc_out, Q].every(isNum)) return null;
     if (!isNum(Ch) && Ch !== Infinity) return null;
@@ -12,9 +25,25 @@ export default function ProfileChart({ solution }) {
     return generateProfile(isParallel, Th_in, Th_out, Tc_in, Tc_out, Ch, Cc, Q);
   }, [Th_in, Th_out, Tc_in, Tc_out, Ch, Cc, Q, isParallel]);
 
-  if (!data) return null;
-  const hotName = hot?.nombre || "Fluido caliente";
-  const coldName = cold?.nombre || "Fluido frío";
+  if (!data) {
+    // Si las 4 temperaturas SÍ se conocen pero falta Ch/Cc (caso raro), no
+    // hay una explicación tan clara que dar — se mantiene el comportamiento
+    // anterior de no mostrar nada en vez de una nota confusa.
+    if (!missingTemps.length) return null;
+    return (
+      <div className="hxs-card">
+        <div className="hxs-section-title">
+          <Activity size={15} color="var(--copper)" /> Perfil de temperatura a lo largo del intercambiador
+        </div>
+        <div className="hxs-alert hxs-alert-info">
+          <Info size={14} />
+          No se puede graficar el perfil: falta{missingTemps.length > 1 ? "n" : ""} {missingTemps.join(", ")}. El
+          enunciado no da la suficiente informacion para determinar{missingTemps.length > 1 ? "las" : "la"} con una única
+          respuesta.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="hxs-card">
