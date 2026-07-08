@@ -24,12 +24,7 @@ export default function DataPanel({ data, onChange, onRecalculate }) {
   const isFlujoCruzado = data.tipo_intercambiador === "flujo_cruzado";
   const needsConv = !!data.requiere_correlacion_convectiva;
   const externalCfg = data.configuracion_lado_externo || "anulo_tubo_doble";
-
-  // Banco de tubos en flujo cruzado dentro de un ducto (sin aletas): p. ej.
-  // "40 tubos de 1 cm en un ducto de 1×1 m, agua por dentro a 3 m/s, aire por
-  // el ducto a 12 m/s". Aquí ninguno de los dos fluidos suele dar gasto
-  // másico directo, así que hace falta saber cuál va por el tubo aunque no
-  // se necesite calcular hᵢ/h₀ por correlación (U puede venir ya dado).
+3
   const isDuctoBancoTubos = isFlujoCruzado && hasVal(data.numero_tubos);
 
   const hasWallConduction = hasVal(data.conductividad_pared_k);
@@ -52,8 +47,7 @@ export default function DataPanel({ data, onChange, onRecalculate }) {
     <div className="hxs-card">
       <div className="hxs-eyebrow" style={{ marginBottom: 12 }}>Paso 2 · Datos detectados</div>
       <p style={{ fontSize: 12.5, color: "var(--ink-dim)", margin: "0 0 14px", lineHeight: 1.5 }}>
-        Revisa lo que se detectó. Si algo está mal, corrígelo y pulsa <b>Recalcular</b> — es instantáneo, no
-        vuelve a llamar a la IA.
+        Revisa lo que se detectó. Si algo está mal, corrígelo y pulsa <b>Recalcular</b>.
       </p>
 
       <div className="hxs-tabs" role="tablist">
